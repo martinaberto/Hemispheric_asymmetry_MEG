@@ -9,5 +9,6 @@ All dependencies are listed in the environment.yml file.
 
 The analysis codes and functions are available in the Pipeline.ipynb notebook and utils folder.
 
+Raw data can be downloaded from here: https://bids-datasets.data-pages.anc.plus.ac.at/auditory/mb_auditory_statistics/ 
 
 Analyses and parameters are described in detail in the manuscript.
