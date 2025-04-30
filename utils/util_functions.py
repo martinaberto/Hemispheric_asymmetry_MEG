@@ -4,49 +4,6 @@ from datetime import datetime
 from os import listdir
 from os.path import join
 
-
-def preproc_data(cur_data, max_filt=False, notch=True, coord_frame='head',
-                 apply_filter=False, hp_lp_freqs=(None, None), do_downsample=False, resample_freq=None):
-    """
-    Minimal preprocessing function. Only contains some maxfiltering.
-    I might add an automatic ICA and autoreject, riemannian potato option
-    """
-
-    if isinstance(cur_data, str):
-        cur_data = mne.io.read_raw_fif(cur_data, preload=True, verbose=False, on_split_missing='warn')
-
-    if max_filt:
-        print('Running maxfilter')
-        calibration_file = '/mnt/obob/staff/fschmidt/anonym/assets/maxfilter_cal/sss_cal.dat'
-        cross_talk_file = '/mnt/obob/staff/fschmidt/anonym/assets/maxfilter_cal/ct_sparse.fif'
-
-        # find bad channels first
-        noisy_chs, flat_chs = mne.preprocessing.find_bad_channels_maxwell(cur_data,
-                                                                          coord_frame=coord_frame,
-                                                                          calibration=calibration_file,
-                                                                          cross_talk=cross_talk_file  # noqa
-                                                                          )
-        cur_data.info['bads'] = noisy_chs + flat_chs
-
-        cur_data = mne.preprocessing.maxwell_filter(cur_data,
-                                                    calibration=calibration_file,
-                                                    cross_talk=cross_talk_file,
-                                                    coord_frame=coord_frame,
-                                                    destination=(0, 0, 0.04) if coord_frame == 'head' else None,  # noqa
-                                                    st_fixed=False)
-
-    if apply_filter:
-        cur_data.filter(hp_lp_freqs[0], hp_lp_freqs[1], fir_design='firwin')
-
-    if notch:
-        cur_data.notch_filter(np.arange(50, 351, 50), filter_length='auto', phase='zero')
-
-    if do_downsample:
-        cur_data.resample(resample_freq, npad="auto")
-
-    return cur_data
-
-
 # Get empty room data that's closest to the actual measurement
 def get_nearest_empty_room(info):
     """
